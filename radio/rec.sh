@@ -12,6 +12,10 @@ set +a
 # default download directory
 download_dir="$HOME/Downloads"
 
+# 変数
+authtoken=""
+stname=""
+
 # version
 VERSION=3.0.0.01
 
@@ -102,6 +106,8 @@ function _atexit() {
 
 # 認証
 function radiko_authorize() {
+    local offset length partialkey areaid
+
     echo "==== authorize ===="
     #
     # get player
@@ -187,6 +193,8 @@ function radiko_authorize() {
 
 # 録音: radiko
 function radiko_record() {
+    local URLLINE RMTP APP PLAYPATH
+
     echo "==== recording ===="
     #
     # get stream-url & get authtoken
@@ -198,9 +206,6 @@ function radiko_record() {
     RMTP="${URLLINE[0]}"
     APP="${URLLINE[1]}"
     PLAYPATH="${URLLINE[2]}"
-    authtoken=`cat ${auth1_fms} | grep --max-count=1 '^X-Radiko-AuthToken' \
-	| awk '{print $2;}' | sed 's/.$//'`
-
     #
     # rtmpdump
     #
@@ -210,7 +215,7 @@ function radiko_record() {
 	--rtmp ${RMTP} \
 	--app ${APP} \
 	--playpath ${PLAYPATH} \
-	-C S:"" -C S:"" -C S:"" -C S:$authtoken \
+	-C S:"" -C S:"" -C S:"" -C S:${authtoken} \
 	-W $playerurl \
 	--live \
 	--stop "${rectime}" \
@@ -226,6 +231,8 @@ function radiko_record() {
 # WARNING が 2 個出る
 # mplayer のみでも可能らしい: https://gist.github.com/matchy2/5310409
 function radiko_nhk() {
+    local PLAYPATH ID
+
     PLAYPATH="$1"
     ID="${channel##*-}"
     ID="${ID,,}" # 小文字にしておく
@@ -357,7 +364,6 @@ if [ "$OPTION_n" = "TRUE" -a "$OPTION_h" = "TRUE" ]; then
     datetime="`date +%y%m%d`"
     oname="${VALUE_n}_${stname}_${datetime}${VALUE_h}.flv"
 fi
-
 
 # 引数解析：終了
 
