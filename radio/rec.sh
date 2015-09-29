@@ -193,8 +193,7 @@ function radiko_record() {
     #
     URLLINE=($(wget -q \
 	"http://radiko.jp/v2/station/stream/${channel}.xml" -O - \
-	| xpath -q -e '//url/item/text()' /dev/stdin \
-	| head -1 \
+	| xpath -q -e '//url/item[1]/text()' \
 	| perl -pe 's!^(.*)://(.*?)/(.*)/(.*?)$/!$1://$2/ $3 $4!'))
     RMTP="${URLLINE[0]}"
     APP="${URLLINE[1]}"
