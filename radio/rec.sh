@@ -123,8 +123,7 @@ function get_station_name() {
 }
 
 
-
-# 放送局名
+# HMS を 秒に変換: 1h30m --> 5400
 function hms2second() {
     local tm=$1
     local sec
@@ -163,7 +162,7 @@ function radiko_authorize() {
 
     echo "==== authorize ===="
 
-    # ディレクトリ：認証キー
+    # ディレクトリ：認証キー他ファイル置き場
     if [ ! -d "${keydir}" ]; then
 	if ! mkdir -p ${keydir}; then
 	    echo "Cannot make directory: ${keydir}"
@@ -211,6 +210,7 @@ function radiko_authorize() {
 
     if [ $? -ne 0 ]; then
 	echo "failed auth1 process"
+	_atexit
 	exit 1
     fi
 
@@ -240,9 +240,9 @@ function radiko_authorize() {
 	--no-check-certificate \
 	https://radiko.jp/v2/api/auth2_fms -O ${auth2_fms}
     rc=$?
-
     if [ $? -ne 0 -o ! -f ${auth2_fms} ]; then
 	echo "failed auth2 process"
+	_atexit
 	exit 1
     fi
 
@@ -491,7 +491,7 @@ while [ $st -lt $ed ]; do
 
     st="`date +%s`"
     rectime="`expr $ed - $st`"
-    echo "== retry(${retry_count}): rest time is $rectime =="
+    echo "== retry(${retry_count}): rest is $rectime =="
 done
 
 
