@@ -23,7 +23,6 @@
 (defconst m-mode-search-no-string "no search string")
 
 
-
 ;; マーク＆ジャンプ
 ; ToDo: 定数宣言、マーク用配列のバッファローカル化
 (defvar m-mode-mark (make-vector 4 nil))
@@ -45,6 +44,17 @@
   (let ((map (make-sparse-keymap)))
     ;; m-mode のキーにキーマップを設定
     ;; (define-key m-mode-map (kbd "C-[") map)
+
+    ;; キーボードマクロ：開始
+    ;; C-[ C-\\ だと message() の表示が出ない
+    ;; C-[ \\ だと出る
+    (define-key map [(control \\)] (kbd "C-[ \\"))
+    (define-key map [(\\)]
+      (lambda ()
+	(interactive)
+	(if defining-kbd-macro
+	    (end-kbd-macro)
+	  (start-kbd-macro nil))))
 
     ;; ファイラー
     (define-key map [(control e)] (kbd "C-[ e"))
@@ -215,7 +225,7 @@
     (define-key map [(control b)]
       (lambda ()
 	(interactive)
-	(message (format "てすと: %s ." (get-char-property (point) 'face)
+	(message (format "てすと(font): %s ." (get-char-property (point) 'face)
 			 ;; system-configuration
 			 ;; (getenv "EMACSOPT")
 			 ;; (emacs-version)
@@ -223,6 +233,13 @@
 			 ))
 	))
 
+    ;; キーボードマクロ:実行
+    (define-key map [(control \\)]
+      (lambda ()
+	(interactive)
+	(if last-kbd-macro
+	    (execute-kbd-macro last-kbd-macro)
+	  (message "キーボードマクロが未定義" ))))
 
     ;; 大文字小文字変換
     ;; 暫定で、1 文字ずつバージョン
