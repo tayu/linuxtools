@@ -225,7 +225,7 @@
     (define-key map [(control b)]
       (lambda ()
 	(interactive)
-	(message (format "てすと(font): %s ." (get-char-property (point) 'face)
+	(message (format "てすと: %s ." (get-char-property (point) 'face)
 			 ;; system-configuration
 			 ;; (getenv "EMACSOPT")
 			 ;; (emacs-version)

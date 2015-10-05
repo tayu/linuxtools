@@ -11,15 +11,116 @@
 ;; 8.その他
 
 
-;; os 判定
+;; 動作環境判定用
+(defconst ENV-TERM    1 "TeraTerm or Console")
+(defconst ENV-MIN ENV-TERM "min: for loop")
+(defconst ENV-CONSOLE 2 "TeraTerm or Console")
+(defconst ENV-LINUX   3 "Other on Linux")
+(defconst ENV-WIN-V22 4 "Windows emacs-22.2")
+(defconst ENV-WIN-V23 5 "Windows emacs-23.4")
+(defconst ENV-MAX ENV-WIN-V23 "max")
+(defconst C-LINUX "linux")
+(defconst C-HURD "gnu")
+(defconst C-WINDOWS "nt6")
 ;; use system-configuration
 ;; linux(coLinux): i486-pc-linux-gnu
 ;; debian-hurd-i386: i586-pc-gnu
 ;; windows 8.1: i386-mingw-nt6.2.9200
-(defun env-is ( str )
-  (cond
-   ((string-match str system-configuration) t)
-   (t nil)))
+;; とりあえず TeraTerm と windows のみ
+(defun get-env ()
+  (let ((os system-configuration))
+    (cond
+     ((string-match C-LINUX os) ENV-TERM)
+     ((string-match C-HURD os) ENV-TERM)
+     ((string-match C-WINDOWS os)
+      (cond
+       ((getenv "EMACSOPT") ENV-WIN-V22)
+       (t ENV-WIN-V23)))
+     (t nil))))
+
+
+;; 文字色の設定
+;; 環境毎の設定が分散するとかえって扱いにくい。ので、まとめる
+;; TeraTerm では色数が制限されるらしい
+;; set-face-bold-p は obsolete で set-face-bold を使えって事らしい
+;; が、Windows 側は -p でないとダメ
+(defun set-screen-color ()
+  (let ((env (get-env)))
+    ;; コメント
+    (cond
+     ((or (= env ENV-WIN-V22) (= env ENV-WIN-V23))
+      (progn
+	(set-face-foreground 'font-lock-comment-face "Gray")
+	(set-face-bold-p 'font-lock-comment-face nil)))
+     (t
+      (progn
+	(set-face-foreground 'font-lock-comment-face "Yellow")
+	(set-face-bold 'font-lock-comment-face nil)
+	))
+     )
+    ;; 予約語
+    (set-face-foreground 'font-lock-keyword-face "Green")
+    (cond
+     ((or (= env ENV-WIN-V22) (= env ENV-WIN-V23))
+      (set-face-bold-p 'font-lock-keyword-face t)))
+    ;; ビルトイン関数
+    (set-face-foreground 'font-lock-builtin-face "Green")
+    (cond
+     ((or (= env ENV-WIN-V22) (= env ENV-WIN-V23))
+      (set-face-bold-p 'font-lock-builtin-face nil))
+     (t
+      (set-face-bold 'font-lock-builtin-face nil)))
+    ;; 関数名
+    (set-face-foreground 'font-lock-function-name-face "Blue")
+    (cond
+     ((or (= env ENV-WIN-V22) (= env ENV-WIN-V23))
+      (set-face-bold-p 'font-lock-function-name-face t))
+     (t
+      (set-face-bold 'font-lock-function-name-face t)))
+    ;; 変数名
+    (set-face-foreground 'font-lock-variable-name-face "Blue")
+    ;; 文字列定数
+    (set-face-foreground 'font-lock-string-face  "Magenta")
+    ;; 定数
+    (set-face-foreground 'font-lock-constant-face "Magenta")
+    (cond
+     ((or (= env ENV-WIN-V22) (= env ENV-WIN-V23))
+      (set-face-bold-p 'font-lock-constant-face t))
+     (t
+      (set-face-bold 'font-lock-constant-face t)))
+    ;; 警告
+    (cond
+     ((or (= env ENV-WIN-V22) (= env ENV-WIN-V23))
+      (set-face-bold-p 'font-lock-warning-face nil))
+     (t
+      (set-face-bold 'font-lock-warning-face nil)))
+    ;; モード毎の設定
+    ;; eval-after-load への指定は *ファイル名* で行う
+    ;; モード名で指定するなら add-hook にする
+    (eval-after-load "sh-script" ; .sh sh-mode shell-script-mode
+      (quote
+       (progn
+	 (set-face-foreground 'sh-heredoc "Red")
+	 )))
+
+    ;; 特定環境
+    (cond
+     ((or (= env ENV-WIN-V22) (= env ENV-WIN-V23))
+      (progn
+	;; カーソル色
+	(add-to-list 'default-frame-alist '(cursor-color . "SlateBlue2"))
+	;; モードライン文字色
+	(set-face-foreground 'modeline "white")
+	;; モードライン背景色
+	(set-face-background 'modeline "MediumPurple2")
+	;; 選択中のリージョン
+	(set-face-background 'region "LightSteelBlue1")
+	;; モードライン（アクティブでないバッファ）の文字色
+	(set-face-foreground 'mode-line-inactive "gray30")
+	;; モードライン（アクティブでないバッファ）の背景色
+	(set-face-background 'mode-line-inactive "gray85")
+	)))
+  ))
 
 
 ;; 共通設定
@@ -37,26 +138,7 @@
   ;; るびきち「日刊Emacs」generic-xは入れとけ
   (require 'generic-x)
   ;; 文字色の変更
-  ;; TeraTerm では色数が制限されるらしい
-					                     ; コメント
-  (set-face-foreground 'font-lock-keyword-face "Green")      ; 予約語
-  (set-face-foreground 'font-lock-builtin-face "Green")      ; ビルトイン関数
-  (set-face-bold-p 'font-lock-builtin-face nil)
-  (set-face-foreground 'font-lock-function-name-face "Blue") ; 関数名
-  (set-face-bold-p 'font-lock-function-name-face t)
-  (set-face-foreground 'font-lock-variable-name-face "Blue") ; 変数名
-  (set-face-foreground 'font-lock-string-face  "Magenta")    ; 文字列定数
-  (set-face-foreground 'font-lock-constant-face "Magenta")   ; 定数
-  (set-face-bold-p 'font-lock-constant-face t)
-  (set-face-bold-p 'font-lock-warning-face nil)              ; 警告
-  ;; モード毎の設定
-  ;; eval-after-load への指定は *ファイル名* で行う
-  ;; モード名で指定するなら add-hook にする
-  (eval-after-load "sh-script" ; .sh sh-mode shell-script-mode
-    (quote
-     (progn
-       (set-face-foreground 'sh-heredoc "Red")
-       )))
+  (set-screen-color)
   )
 
 ;; 共通設定: Windows
@@ -74,9 +156,6 @@
 	     (format-time-string "%04Y%02m%02d-%02H%02M%02S-" (current-time))
 	     (file-name-nondirectory filename))))
   ;; 表示
-  ;; 文字色
-  (set-face-foreground 'font-lock-comment-face "Gray")         ; コメント
-  (set-face-bold-p 'font-lock-comment-face nil)
   ;; カーソル行強調表示（アンダーラインは画面末まで引かれない）
   ;;(setq hl-line-face 'underline)
   (global-hl-line-mode)
@@ -89,19 +168,6 @@
 	   (foreground-color . "#00040F")         ; 文字色
 	   (background-color . "#FFFAF0")         ; 背景色
 	   ) default-frame-alist))
-  ;; 表示：個別設定
-  ;; カーソルの色を設定します。
-  (add-to-list 'default-frame-alist '(cursor-color . "SlateBlue2"))
-  ;; モードラインの文字色
-  (set-face-foreground 'modeline "white")
-  ;; モードラインの背景色
-  (set-face-background 'modeline "MediumPurple2")
-  ;; 選択中のリージョンの色
-  (set-face-background 'region "LightSteelBlue1")
-  ;; モードライン（アクティブでないバッファ）の文字色
-  (set-face-foreground 'mode-line-inactive "gray30")
-  ;; モードライン（アクティブでないバッファ）の背景色
-  (set-face-background 'mode-line-inactive "gray85")
   ;; カラム番号の表示: windows 版のみしか効かない
   (setq column-number-mode t)
 
@@ -148,9 +214,6 @@
 	     (file-name-nondirectory filename))))
 
   ;; 表示関連設定
-  ;; 文字色
-  (set-face-foreground 'font-lock-comment-face "Yellow")       ; コメント
-  (set-face-bold-p 'font-lock-comment-face nil)
   ;; 現在行に色をつける
   (setq hl-line-face 'underline)
   (global-hl-line-mode)
@@ -238,19 +301,13 @@
 
 
 ;; -- main --
-(cond
- ;; coLinux
- ((env-is "linux") (init-linux))
- ;; debian-hurd-i386
- ((env-is "gnu") (init-linux))
- ;; Windows 8.1
- ((env-is "nt6")
+(let ((env (get-env)))
   (cond
-   ((getenv "EMACSOPT") (init-windows-dev))
-   ;; default for Windows 8.1
-   (t (init-windows))))
- ;; default
- (t (princ (format "Init Error: os is not supported .\n"))))
+   ((= env ENV-TERM) (init-linux))
+   ((= env ENV-WIN-V22) (init-windows-dev))
+   ((= env ENV-WIN-V23) (init-windows))
+   (t (princ (format "Init Error: os is not supported .\n")))
+  ))
 
 ;; キーマップ定義用マイナーモードの読み込み
 (load "m-mode")
