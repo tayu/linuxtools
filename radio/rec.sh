@@ -70,7 +70,7 @@ function show_list() {
     NACK5   NACK5
     FMT     TOKYO FM
     FMJ     J-WAVE
-a    YFM     ＦＭヨコハマ
+    YFM     ＦＭヨコハマ
   AM
     TBS     TBS
     QRR     文化放送
@@ -593,7 +593,6 @@ function sumul_record() {
 
     svfile="${output%%.flv}.wma"
     opt="$mpopt -dumpstream -dumpfile ${svfile}"
-
     if [ "mms://" = "${url:0:6}" ]; then
 	opt="$opt ${url}"
     elif [ ".asx" = "${url:${#url}-4:4}" ]; then
@@ -789,6 +788,7 @@ while [ $st -lt $ed ]; do
 	    else
 		radiko_authorize && radiko_record
 	    fi
+            ;;
     esac
     if [ 0 -eq $? ]; then
         break
@@ -810,7 +810,7 @@ while [ $st -lt $ed ]; do
 
     st="`date +%s`"
     rectime="`expr $ed - $st`"
-    echo "== retry(${retry_count}): rest is $rectime =="
+    echo "== retry(${retry_count}): rest time is $rectime =="
 done
 
 
