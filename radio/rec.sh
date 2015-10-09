@@ -299,10 +299,8 @@ function set_simul_name() {
     SIMUL_ST[ "fmpalulun" ]="http://www.simulradio.info/asx/fmpalulun.asx"
     SIMUL_ST[ "flower" ]="http://www.fm767.com/flower_64k.asx"
     SIMUL_ST[ "smile" ]="http://www.simulradio.info/asx/smile.asx"
-#   SIMUL_ST[ "shonanbeachfma" ]="http://www.simulradio.info/asx/shonanbeachfma.asx"
-    SIMUL_ST[ "shonanbeachfma" ]="mms://simul.freebit.net/shonanbeachfma"
-#   SIMUL_ST[ "radioshonan" ]="http://www.simulradio.info/asx/radioshonan.asx"
-    SIMUL_ST[ "radioshonan" ]="mms://simul.freebit.net/radioshonan"
+    SIMUL_ST[ "shonanbeachfma" ]="http://www.simulradio.info/asx/shonanbeachfma.asx"
+    SIMUL_ST[ "radioshonan" ]="http://www.simulradio.info/asx/radioshonan.asx"
     SIMUL_ST[ "fmodawara" ]="http://www.simulradio.info/asx/fmodawara.asx"
     SIMUL_ST[ "redswave" ]="http://redswave.com/simul.asx"
     SIMUL_ST[ "tsukuba" ]="http://www.simulradio.info/asx/tsukuba.asx"
@@ -381,7 +379,6 @@ function set_simul_name() {
     SIMUL_ST[ "motob" ]="http://www.simulradio.info/asx/motob.asx"
     SIMUL_ST[ "fmkumejima" ]="http://www.simulradio.info/asx/fmkumejima.asx"
 }
-
 
 
 # HMS を 秒に変換: 1h30m --> 5400
@@ -583,11 +580,9 @@ function radiko_nhk() {
 }
 
 
-
-
 # 録音: simul radio
 function sumul_record() {
-    local url svfile outfile rc pid st ed interval opt
+    local url svfile outfile rc pid st ed interval opt mms
     url="$1"
     interval=10
 
@@ -596,7 +591,16 @@ function sumul_record() {
     if [ "mms://" = "${url:0:6}" ]; then
 	opt="$opt ${url}"
     elif [ ".asx" = "${url:${#url}-4:4}" ]; then
-	opt="$opt -playlist ${url}"
+	mms=($( \
+	    wget -q "${url}" -O - \
+	      | grep mms \
+	      | perl -pe 's!^(.*)"(.*)"(.*)$!$2!' \
+	      ))
+	if [ ! -z "${mms}" ]; then
+	    opt="$opt ${mms}"
+	else
+	    opt="$opt -playlist ${url}"
+	fi
     else
 	opt="$opt ${url}"
     fi
@@ -606,14 +610,12 @@ function sumul_record() {
     pid=$!
     while [ $st -lt $ed ]; do
 	sleep ${interval}
-
 	if [ -z "`ps --no-headers -o pid $pid`" ]; then
 	    # abend
 	    wait $pid
 	    rc=1
 	    break
 	fi
-
 	st="`date +%s`"
     done
     if [ -z "$rc" ]; then
@@ -630,8 +632,6 @@ function sumul_record() {
 
     return $rc
 }
-
-
 
 
 #
