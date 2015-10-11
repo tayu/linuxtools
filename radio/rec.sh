@@ -39,7 +39,6 @@ else
     pager="/bin/more"
 fi
 
-
 # mplayer: --quiet or --really-quiet
 mpopt="--quiet"
 
@@ -79,6 +78,8 @@ function show_list() {
   短波
     RN1     ラジオNIKKEI第1
     RN2     ラジオNIKKEI第2
+  その他
+    HOUSOU-DAIGAKU 放送大学
   NHK
     NHK-FM  ＮＨＫ－ＦＭ
     NHK-R1  ＮＨＫ第一放送
@@ -87,7 +88,7 @@ function show_list() {
     sankakuyama         三角山放送局［札幌市西区］
     jaga                FM JAGA［帯広市］
     fmwing              FM WING［帯広市］
-    dramacity           RadioD FM dramacity［札幌市厚別区］
+x   dramacity           RadioD FM dramacity［札幌市厚別区］ NG 映像らしい
     FmKushiro           FMくしろ［釧路市］
     fmwappy             FMわっぴ～［稚内市］
     fm-riviere          FMりべーる［旭川市］
@@ -101,7 +102,7 @@ function show_list() {
     fmmotcom            エフエム モットコム［本宮市］
     fm-iwaki            FMいわき［いわき市］
     fmaizu              エフエム会津［会津若松市］
-    yutopia             FMゆーとぴあ［湯沢市］            *
+    yutopia             FMゆーとぴあ［湯沢市］
     fmyokote            横手かまくらエフエム［横手市］
     miyakofm            みやこハーバーラジオ［宮古市］
     RadioIshinomaki     ラジオ石巻［石巻市］
@@ -129,8 +130,8 @@ function show_list() {
     fmpalulun           FMぱるるん［水戸市］
     flower              フラワーラジオ［鴻巣市］
     smile               すまいるFM［朝霞市］
-    shonanbeachfma      湘南ビーチFM［逗子市・葉山町］  *
-    radioshonan         レディオ湘南［藤沢市］          *
+    shonanbeachfma      湘南ビーチFM［逗子市・葉山町］
+    radioshonan         レディオ湘南［藤沢市］
     fmodawara           FMおだわら［小田原市］
     redswave            REDS WAVE［さいたま市］
     tsukuba             ラヂオつくば［つくば市］
@@ -238,11 +239,12 @@ function get_station_name() {
         station[ "NHK-R2" ]   = "ＮＨＫ第二放送";
         station[ "RN1" ]      = "ラジオNIKKEI第1";
         station[ "RN2" ]      = "ラジオNIKKEI第2";
+        station[ "HOUSOU-DAIGAKU" ] = "放送大学";
     }
     {
         name = station[ $1 ]
         if ( 0 == length( name ) ) {
-            printf( "(none)" );
+            printf( "%s", $1 );
         } else {
             printf( "%s", name );
         }
@@ -253,7 +255,7 @@ function get_station_name() {
 
 # 放送局名：サイマル
 declare -A SIMUL_ST
-function set_simul_name() {
+function set_simul_station() {
     SIMUL_ST[ "sankakuyama" ]="http://wm.sankakuyama.co.jp/asx/sankaku_24k.asx"
     SIMUL_ST[ "jaga" ]="http://www.simulradio.info/asx/fmjaga.asx"
     SIMUL_ST[ "fmwing" ]="http://www.simulradio.info/asx/fmwing.asx"
@@ -593,7 +595,7 @@ function sumul_record() {
     elif [ ".asx" = "${url:${#url}-4:4}" ]; then
 	mms=($( \
 	    wget -q "${url}" -O - \
-	      | grep mms \
+	      | grep 'mms://' \
 	      | perl -pe 's!^(.*)"(.*)"(.*)$!$2!' \
 	      ))
 	if [ ! -z "${mms}" ]; then
@@ -612,7 +614,6 @@ function sumul_record() {
 	sleep ${interval}
 	if [ -z "`ps --no-headers -o pid $pid`" ]; then
 	    # abend
-	    wait $pid
 	    rc=1
 	    break
 	fi
@@ -764,12 +765,11 @@ fi
 # 出力ファイル名: 第一回
 output="${wdir}/${fname}"
 
-
 # メイン
 retry_count=0
 st="`date +%s`"
 ed="`expr $st + $rectime`"
-set_simul_name
+set_simul_station
 while [ $st -lt $ed ]; do
     case ${channel} in
         NHK-R1)  # ラジオ第1
