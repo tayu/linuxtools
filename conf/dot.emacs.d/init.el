@@ -14,24 +14,29 @@
 ;; 動作環境判定用
 (defconst ENV-TERM    1 "TeraTerm or Console")
 (defconst ENV-MIN ENV-TERM "min: for loop")
-(defconst ENV-CONSOLE 2 "TeraTerm or Console")
+(defconst ENV-DEBIAN  2 "debian")
 (defconst ENV-LINUX   3 "Other on Linux")
-(defconst ENV-WIN-V22 4 "Windows emacs-22.2")
-(defconst ENV-WIN-V23 5 "Windows emacs-23.4")
+(defconst ENV-COLINUX 4 "coLinux")
+(defconst ENV-WIN-V22 5 "Windows emacs-22.2")
+(defconst ENV-WIN-V23 6 "Windows emacs-23.4")
 (defconst ENV-MAX ENV-WIN-V23 "max")
 (defconst C-LINUX "linux")
+(defconst C-COLINUX "i486-pc-linux-gnu")
 (defconst C-HURD "gnu")
 (defconst C-WINDOWS "nt6")
 ;; use system-configuration
-;; linux(coLinux): i486-pc-linux-gnu
+;; debian-amd64:x86_64-pc-linux-gnu
+;; debian-i386: 
+;; coLinux); i486-pc-linux-gnu
 ;; debian-hurd-i386: i586-pc-gnu
 ;; windows 8.1: i386-mingw-nt6.2.9200
-;; とりあえず TeraTerm と windows のみ
+;; 他に NetBSD OpenBSD BeOS
 (defun get-env ()
   (let ((os system-configuration))
     (cond
-     ((string-match C-LINUX os) ENV-TERM)
-     ((string-match C-HURD os) ENV-TERM)
+     ((string-match C-COLINUX os) ENV-COLINUX)
+     ((string-match C-LINUX os) ENV-DEBIAN)
+     ((string-match C-HURD os) ENV-DEBIAN)
      ((string-match C-WINDOWS os)
       (cond
        ((getenv "EMACSOPT") ENV-WIN-V22)
@@ -48,7 +53,7 @@
   (let ((env (get-env)))
     ;; コメント
     (cond
-     ((or (= env ENV-WIN-V22) (= env ENV-WIN-V23))
+     ((or (= env ENV-COLINUX) (= env ENV-WIN-V22) (= env ENV-WIN-V23))
       (progn
 	(set-face-foreground 'font-lock-comment-face "Gray")
 	(set-face-bold-p 'font-lock-comment-face nil)))
@@ -61,19 +66,19 @@
     ;; 予約語
     (set-face-foreground 'font-lock-keyword-face "Green")
     (cond
-     ((or (= env ENV-WIN-V22) (= env ENV-WIN-V23))
+     ((or (= env ENV-COLINUX) (= env ENV-WIN-V22) (= env ENV-WIN-V23))
       (set-face-bold-p 'font-lock-keyword-face t)))
     ;; ビルトイン関数
     (set-face-foreground 'font-lock-builtin-face "Green")
     (cond
-     ((or (= env ENV-WIN-V22) (= env ENV-WIN-V23))
+     ((or (= env ENV-COLINUX) (= env ENV-WIN-V22) (= env ENV-WIN-V23))
       (set-face-bold-p 'font-lock-builtin-face nil))
      (t
       (set-face-bold 'font-lock-builtin-face nil)))
     ;; 関数名
     (set-face-foreground 'font-lock-function-name-face "Blue")
     (cond
-     ((or (= env ENV-WIN-V22) (= env ENV-WIN-V23))
+     ((or (= env ENV-COLINUX) (= env ENV-WIN-V22) (= env ENV-WIN-V23))
       (set-face-bold-p 'font-lock-function-name-face t))
      (t
       (set-face-bold 'font-lock-function-name-face t)))
@@ -84,13 +89,13 @@
     ;; 定数
     (set-face-foreground 'font-lock-constant-face "Magenta")
     (cond
-     ((or (= env ENV-WIN-V22) (= env ENV-WIN-V23))
+     ((or (= env ENV-COLINUX) (= env ENV-WIN-V22) (= env ENV-WIN-V23))
       (set-face-bold-p 'font-lock-constant-face t))
      (t
       (set-face-bold 'font-lock-constant-face t)))
     ;; 警告
     (cond
-     ((or (= env ENV-WIN-V22) (= env ENV-WIN-V23))
+     ((or (= env ENV-COLINUX) (= env ENV-WIN-V22) (= env ENV-WIN-V23))
       (set-face-bold-p 'font-lock-warning-face nil))
      (t
       (set-face-bold 'font-lock-warning-face nil)))
@@ -105,7 +110,7 @@
 
     ;; 特定環境
     (cond
-     ((or (= env ENV-WIN-V22) (= env ENV-WIN-V23))
+     ((or (= env ENV-COLINUX) (= env ENV-WIN-V22) (= env ENV-WIN-V23))
       (progn
 	;; カーソル色
 	(add-to-list 'default-frame-alist '(cursor-color . "SlateBlue2"))
@@ -303,7 +308,8 @@
 ;; -- main --
 (let ((env (get-env)))
   (cond
-   ((= env ENV-TERM) (init-linux))
+   ((= env ENV-COLINUX) (init-linux))
+   ((= env ENV-DEBIAN) (init-linux))
    ((= env ENV-WIN-V22) (init-windows-dev))
    ((= env ENV-WIN-V23) (init-windows))
    (t (princ (format "Init Error: os is not supported .\n")))

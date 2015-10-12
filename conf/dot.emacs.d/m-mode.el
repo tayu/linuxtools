@@ -177,20 +177,20 @@
 			       (message "no other window")
 			     (select-window (next-window)))))
 
-    ;; マーク＆ジャンプ
-    (define-key map  (kbd "C-1") (kbd "C-k 1"))
+    ;; マーク＆19~20~ジャンプ
+    (define-key map (kbd "C-1") (kbd "C-k 1"))
     (define-key map (kbd "1") (lambda ()
 				(interactive)
 				(m-mode-set-mark 1)))
-    (define-key map  (kbd "C-2") (kbd "C-k 2"))
+    (define-key map (kbd "C-2") (kbd "C-k 2"))
     (define-key map (kbd "2") (lambda ()
 				(interactive)
 				(m-mode-set-mark 2)))
-    (define-key map  (kbd "C-3") (kbd "C-k 3"))
+    (define-key map (kbd "C-3") (kbd "C-k 3"))
     (define-key map (kbd "3") (lambda ()
 				(interactive)
 				(m-mode-set-mark 3)))
-    (define-key map  (kbd "C-4") (kbd "C-k 4"))
+    (define-key map (kbd "C-4") (kbd "C-k 4"))
     (define-key map (kbd "4") (lambda ()
 				(interactive)
 				(m-mode-set-mark 4)))
@@ -226,12 +226,21 @@
       (lambda ()
 	(interactive)
 	(message (format "てすと: %s ." (get-char-property (point) 'face)
+			 ;; (get-char-property (point) 'face)
 			 ;; system-configuration
 			 ;; (getenv "EMACSOPT")
 			 ;; (emacs-version)
 			 ;; emacs-version
 			 ))
 	))
+
+    ;; Tab 入力
+    ;; TeraTerm からは効かない
+    (define-key map [(control shift i)]
+      (lambda ()
+	(interactive)
+	(insert "\t" )))
+
 
     ;; キーボードマクロ:実行
     (define-key map [(control \\)]
