@@ -390,30 +390,30 @@ function set_simul_station() {
 
 # HMS を 秒に変換: 1h30m --> 5400
 function hms2second() {
-    local tm=$1
+    local hms="$1"
     local sec
-    sec=`echo $tm | awk '
+    sec=`echo $hms | awk '
 {
-    t = 0;
-    tm = 0;
-    for ( i = 0; i <= length( $0 ); ++i ) {
-        c = toupper( substr( $0, i, 1 ) );
+    t = 0
+    tm = 0
+    for ( i = 1; i <= length( $0 ); ++i ) {
+        c = toupper( substr( $0, i, 1 ) )
         if ( "0" <= c && c <= "9") {
-            t = t * 10 + c;
+            t = t * 10 + c
         } else if ( "H" == c ) {
-            tm = tm + t * 3600;
-            t = 0;
+            tm = tm + t * 3600
+            t = 0
         } else if ( "M" == c ) {
             tm = tm + t * 60
-            t = 0;
+            t = 0
         } else if ( "S" == c ) {
             tm = tm + t
-            t = 0;
-            break;
+            t = 0
+            break
         }
     }
     tm = tm + t
-    printf( "%d", tm );
+    printf( "%d", tm )
 }
 '`
     echo "$sec"

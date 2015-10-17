@@ -20,7 +20,7 @@ function radiko_record() {
     # rtmpdump
     #
     # WARNING が出る
-    echo "save to '$output'"
+    echo "save to '$output' (${rectime} Sec.)"
     ${RTMPDUMP} \
         --rtmp ${RMTP} \
         --app ${APP} \
