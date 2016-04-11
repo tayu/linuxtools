@@ -6,6 +6,7 @@ trap "_atexit;  exit 1" HUP INT QUIT USR1 USR2
 set -a
 # use http proxy for wget
 http_proxy="http://127.0.0.1:3128/"
+https_proxy="https://127.0.0.1:3128/"
 set +a
 
 # default download directory
@@ -15,7 +16,7 @@ download_dir="$HOME/${default_dir}"
 # 変数
 authtoken=""
 stname=""
-retry_limit="1"
+retry_limit="6"
 
 # version
 VERSION=3.0.0.01
@@ -30,22 +31,23 @@ auth2_fms="${tempdir}/auth2_fms_$$"
 playerurl="http://radiko.jp/player/swf/player_${VERSION}.swf"
 # 余白
 filler="60"
-
 # ページ表示
-if [ ! -z "$PAGER" ]; then
+if which less 2>&1 1>/dev/null ; then
+    pager="less -X"
+elif [ ! -z "$PAGER" ]; then
     pager="$PAGER"
 else
     pager="/bin/more"
 fi
 
+# default option
 # mplayer: --quiet or --really-quiet
-mpopt="--quiet"
-
-# program
-# mplayer: option: --quiet or --really-quiet
 MPLAYER="mplayer --really-quiet"
-# rtmpdump: option: --quiet
-RTMPDUMP="rtmpdump --quiet"
+# mplayer network: 128000bytes=1Mbits, 256(kByte)
+mpopt="--bandwidth=128000 --cache=256"
+
+# rtmpdump
+RTMPDUMP="rtmpdump --quiet --timeout 360"
 
 
 # 使い方
@@ -55,10 +57,10 @@ Usage: $COMMAND [-a] [-o output_path] [-t recording_seconds] station_ID
   -a  エリア情報を出力して終了 (ex:'JP13, tokyo Japan')
   -d  出力ディレクトリ名 (デフォルトは \$HOME/${default_dir})
   -f  出力ファイル名 (デフォルトは STATION_YYYYMMDD-hhmm.flv)
-  -h  時刻指定(ファイル名に設定)
-  -l  番組リスト(radiko は JP13)
+  -h  時刻指定(ファイル名に設定) 1400 など
+  -l  番組リスト(radiko は JP13 固定)
   -n  番組名(ファイル名に設定)
-  -r  リトライ回数
+  -r  リトライ回数 （デフォルトは ${retry_limit} 回）
   -t  録音時間 (秒または HMS) (デフォルトは 30秒)
   -w  開始時に（少し）待つ(秒)
 EOF
@@ -68,6 +70,8 @@ EOF
 function show_list() {
     cat | ${pager} <<EOF
 放送局一覧
+  ランダム
+    RND     RANDOM
   FM
     INT     InterFM
     BAYFM78 bayfm78
@@ -684,11 +688,11 @@ while [ $st -lt $ed ]; do
         break
     fi
     if [ 0 -eq $retry_prev ]; then
-        output="${output/.flv/(1).flv}"
-        oname="${oname/.flv/(1).flv}"
+        output="${output/.flv/_(1).flv}"
+        oname="${oname/.flv/_(1).flv}"
     else
-        output="${output/(${retry_prev}).flv/(${retry_count}).flv}"
-        oname="${oname/(${retry_prev}).flv/(${retry_count}).flv}"
+        output="${output/_(${retry_prev}).flv/_(${retry_count}).flv}"
+        oname="${oname/_(${retry_prev}).flv/_(${retry_count}).flv}"
     fi
 
     st="`date +%s`"
