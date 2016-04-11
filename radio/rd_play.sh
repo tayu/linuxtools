@@ -20,7 +20,12 @@ function radiko_record() {
     # rtmpdump
     #
     # WARNING が出る
-    echo "save to '$output' (${rectime} Sec.)"
+    echo "Play as '$output' (${rectime} Sec.)"
+
+    # 80 ポートが開いてないと 3 分待ちになる。
+    # 環境変数の設定（http_proxy, https_proxy）は効かない（一瞬効いた気も?）
+    http_proxy="$http_proxy" \
+    https_proxy="$https_proxy" \
     ${RTMPDUMP} \
         --rtmp ${RMTP} \
         --app ${APP} \
@@ -47,8 +52,11 @@ function radiko_nhk() {
     ID="${ID,,}" # 小文字にしておく
 
     echo "==== recording ===="
-    echo "save as '$output'"
+    echo "save as '$output' (${rectime} sec.)"
+    echo "http_proxy: $http_proxy"
 
+    http_proxy="$http_proxy" \
+    https_proxy="$https_proxy" \
     ${RTMPDUMP} \
 	--rtmp "rtmpe://netradio-${ID}-flash.nhk.jp" \
         --playpath "${PLAYPATH}" \
