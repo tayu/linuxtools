@@ -1,0 +1,59 @@
+サイマル放送局一覧
+そうだ xml にしよう
+タグは radiko に倣って
+
+
+
+
+mplayer に時間指定
+
+$ (sleep 60;echo -n q) | \
+mplayer -playlist http://mfile.akamai.com/129933/live/reflector:46051.asx \
+-benchmark -ao pcm:file=/dev/stdout -vc null -really-quiet -quiet | \
+lame -q 4 - NHKFM.mp3
+
+'Q' の入力を時間差で渡す、かぁ
+ちなみに、上記は NHK の聴取
+
+
+
+
+
+
+mms の保存
+
+http://blog.wolf.boy.jp/?eid=1095768
+$ mplayer mms://mbs.sswmt1.smartstream.ne.jp/mbs/arigatou/arigatou1208.wma \
+-dumpstream -dumpfile arigatou.wma
+
+
+http://netlog.jpn.org/r271-635/2006/11/linuxwindowsmedia_mplayer.html
+$ mplayer -playlist http://asx.skypro.tv/asx/radio/radio32-128.asx \
+-dumpstream -dumpfile arigatou.wma
+
+mms rtmp はそのまま、.asx は -playlist で渡してやると良いらしい
+と、云う事は、url の取り出しは不要、と
+
+
+
+
+
+asx ファイルから url を取り出す
+
+入力サンプル
+
+<ASX Version = "3.0">
+
+<Entry>
+<Ref href = "http://bayfm.dnslb.bbtower.tv/BayFM/artist/bump-20150913.wma"/>
+</Entry>
+</ASX>
+
+
+$ cat sample.xml |  xpath -q -e '/ASX/Entry/Ref/@href' wmt-bump.asx | perl -pe 's!^(.*)\"(.*)\"(.*)$/!$2!'
+
+
+xpath で @ で属性を指定すると
+      key=value
+形式で取得はできるが、属性値のみの取得はできないっぽい
+
