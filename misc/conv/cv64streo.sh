@@ -7,7 +7,7 @@
 CONV="./conv2mp3.sh"
 #OPT="--test"
 OPT=""
-OPT="${OPT} -b 64 -n 9 -r"
+OPT="${OPT} -b 64 -q 0 -a"
 
 
 SRCDIR="src"

@@ -1,0 +1,19 @@
+# This file only needs to list configuration variables that deviate
+# from the default values.  See /usr/share/doc/polipo/examples/config.sample
+# and "polipo -v" for variables you can tweak and further information.
+
+logSyslog = true
+logFile = /var/log/polipo/polipo.log
+
+# listen port
+proxyPort = 3128
+
+# access control
+allowedClients = 127.0.0.1, 10.0.0.0/8, 172.0.0.0/12, 192.168.0.0/16
+
+# parent proxy
+parentProxy = 192.168.32.12:33128
+
+# no disk cache
+maxDiskCacheEntrySize = 0
+diskCacheUnlinkTime = 0

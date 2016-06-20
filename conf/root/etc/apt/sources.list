@@ -1,0 +1,11 @@
+# deb http://cdn.debian.or.jp/debian/ jessie main
+
+deb [arch=amd64,i386] http://cdn.debian.or.jp/debian/ jessie main
+deb-src [arch=amd64,i386] http://cdn.debian.or.jp/debian/ jessie main
+
+deb [arch=amd64,i386]  http://security.debian.org/ jessie/updates main
+deb-src [arch=amd64,i386] http://security.debian.org/ jessie/updates main
+
+# jessie-updates, previously known as 'volatile'
+deb [arch=amd64,i386] http://cdn.debian.or.jp/debian/ jessie-updates main
+deb-src [arch=amd64,i386] http://cdn.debian.or.jp/debian/ jessie-updates main

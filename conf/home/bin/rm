@@ -1,0 +1,55 @@
+#! /bin/bash
+
+DATE=`date "+%Y%m%d-%H%M%S"`
+TRASH="$HOME/.trash"
+WIN="$HOME/win"
+SHARE="/media/sf_share"
+
+
+if [ ! -d ${TRASH} ]; then
+    mkdir -p ${TRASH}
+fi
+
+while [ 0 -lt $# ]; do
+    fname="$1"
+    shift
+
+    # 存在チェック: 通常とシムリンク
+    if [[ ! -e "$fname" && ! -h "$fname" ]]; then
+	echo "$0: not exist: '$fname'"
+	continue
+    fi
+
+    # パスを分離しファイル名をフルパスにする
+    # シンボリックリンクを戻した名称も取得
+    if [ "/" = "${fname:0:1}" ]; then
+	pname="`dirname "$fname"`"
+    elif [ "${f}" != "${fname/\//}" ]; then
+	pname="$PWD/`dirname "$fname"`"
+    else
+	pname="$PWD"
+    fi
+    bname="`basename \"${fname}\"`"
+    fname="${pname}/${bname}"
+    # -m: 存在チェックはしない
+    oname="`readlink -m \"${fname}\"`"
+
+    # 実行
+    if [ "${TRASH}" = "${pname}" ]; then
+        # ゴミ箱の中
+	/bin/rm -rf "$fname"
+    elif [ -h "${fname}" ]; then
+        # シンボリックリンクはそれが対象
+	/bin/rm -rf "$fname"
+    elif [ "${SHARE}" = "${oname:0:${#SHARE}}" ]; then
+        # VBOX 共有ディレクトリ: 先頭から /media/sf_share との一致を見る
+	/bin/rm -rf "$fname"
+    elif [ "${WIN}" = "${oname:0:${#WIN}}" ]; then
+        # coLinux 共有ディレクトリ: 先頭から $HOME/win/ との一致を見る
+	/bin/rm -rf "$fname"
+    else
+        # 通常ファイル
+	/bin/mv -f "$fname" "${TRASH}/${DATE}-${bname}"
+    fi
+done
+

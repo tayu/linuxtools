@@ -10,6 +10,12 @@
 ;; 7.eval-after-loadを使う
 ;; 8.その他
 
+;; ToDo:
+;; html のバックアップが作成されない
+;; メジャーモードが sgml-mode らしいので add-hook してみたが、
+;; フックに指定した関数は呼び出されるものの、効かない。
+;; アドバイスの追加とかにするかな
+
 
 ;; 動作環境判定用
 (defconst ENV-TERM    1 "TeraTerm or Console")
@@ -17,19 +23,22 @@
 (defconst ENV-DEBIAN  2 "debian")
 (defconst ENV-LINUX   3 "Other on Linux")
 (defconst ENV-COLINUX 4 "coLinux")
-(defconst ENV-WIN-V22 5 "Windows emacs-22.2")
-(defconst ENV-WIN-V23 6 "Windows emacs-23.4")
+(defconst ENV-NETBSD 5 "netbsd")
+(defconst ENV-WIN-V22 6 "Windows emacs-22.2")
+(defconst ENV-WIN-V23 7 "Windows emacs-23.4")
 (defconst ENV-MAX ENV-WIN-V23 "max")
 (defconst C-LINUX "linux")
 (defconst C-COLINUX "i486-pc-linux-gnu")
 (defconst C-HURD "gnu")
+(defconst C-NETBSD "netbsd")
 (defconst C-WINDOWS "nt6")
 ;; use system-configuration
-;; debian-amd64:x86_64-pc-linux-gnu
-;; debian-i386: 
-;; coLinux); i486-pc-linux-gnu
-;; debian-hurd-i386: i586-pc-gnu
-;; windows 8.1: i386-mingw-nt6.2.9200
+;; debian-amd64		x86_64-pc-linux-gnu
+;; debian-i386		i586-pc-linux-gnu
+;; coLinux)		i486-pc-linux-gnu
+;; debian-hurd-i386 	i586-pc-gnu
+;; NetBSD 		x86_64--netbsd
+;; windows 8.1	 	i386-mingw-nt6.2.9200
 ;; 他に NetBSD OpenBSD BeOS
 (defun get-env ()
   (let ((os system-configuration))
@@ -37,6 +46,7 @@
      ((string-match C-COLINUX os) ENV-COLINUX)
      ((string-match C-LINUX os) ENV-DEBIAN)
      ((string-match C-HURD os) ENV-DEBIAN)
+     ((string-match C-NETBSD os) ENV-NETBSD)
      ((string-match C-WINDOWS os)
       (cond
        ((getenv "EMACSOPT") ENV-WIN-V22)
@@ -82,10 +92,20 @@
       (set-face-bold-p 'font-lock-function-name-face t))
      (t
       (set-face-bold 'font-lock-function-name-face t)))
-    ;; 変数名
-    (set-face-foreground 'font-lock-variable-name-face "Blue")
+    ;; 変数名: Blue
+    (set-face-foreground 'font-lock-variable-name-face "Cyan")
+    (cond
+     ((or (= env ENV-COLINUX) (= env ENV-WIN-V22) (= env ENV-WIN-V23))
+      (set-face-bold-p 'font-lock-variable-name-face nil))
+     (t
+      (set-face-bold 'font-lock-variable-name-face t)))
     ;; 文字列定数
     (set-face-foreground 'font-lock-string-face  "Magenta")
+    (cond
+     ((or (= env ENV-COLINUX) (= env ENV-WIN-V22) (= env ENV-WIN-V23))
+      (set-face-bold-p 'font-lock-string-face nil))
+     (t
+      (set-face-bold 'font-lock-string-face t)))
     ;; 定数
     (set-face-foreground 'font-lock-constant-face "Magenta")
     (cond
@@ -144,6 +164,9 @@
   (require 'generic-x)
   ;; 文字色の変更
   (set-screen-color)
+  ;; マークダウンモード（指定が不要になってほしい）
+  (add-to-list 'auto-mode-alist '( "\\.md\\'" . markdown-mode))
+  (add-to-list 'auto-mode-alist '( "\\.markdown\\'" . markdown-mode))
   )
 
 ;; 共通設定: Windows
@@ -156,10 +179,19 @@
   ;; バックアップファイル名にディレクトリ名を付加する
   ;; 命名関数を再定義
   (defun make-backup-file-name (filename)
-    (concat "D:/trashbox/"
-	    (concat
-	     (format-time-string "%04Y%02m%02d-%02H%02M%02S-" (current-time))
-	     (file-name-nondirectory filename))))
+    (concat
+     "D:/trashbox/"
+     (format-time-string "%04Y%02m%02d-%02H%02M%02S-" (current-time))
+     (file-name-nondirectory filename)))
+  ;; 自動セーブファイルの作成先
+  (defun make-auto-save-file-name ()
+    (concat
+     "D:/trashbox/"
+     "#"
+     (format-time-string "%04Y%02m%02d-%02H%02M%02S-" (current-time))
+     (file-name-nondirectory buffer-file-name)
+     "#"))
+
   ;; 表示
   ;; カーソル行強調表示（アンダーラインは画面末まで引かれない）
   ;;(setq hl-line-face 'underline)
@@ -209,14 +241,22 @@
   ;; バックアップ関連の設定
   ;; バックアップファイルを作成する様に指定
   (setq make-backup-files t)
-  ;; バックアップ用にコピーする。リンク先は変わらない
+  ;; バックアップ用にコピーする。シムリンクを保持
   (setq backup-by-copying t)
   ;; バックアップファイルの命名関数を再定義して、ディレクトリ名を付加する
   (defun make-backup-file-name (filename)
-    (concat "~/.trash/"
-	    (concat
-	     (format-time-string "%04Y%02m%02d-%02H%02M%02S-" (current-time))
-	     (file-name-nondirectory filename))))
+    (concat
+     "~/.trash/"
+     (format-time-string "%04Y%02m%02d-%02H%02M%02S-" (current-time))
+     (file-name-nondirectory filename)))
+  ;; 自動セーブファイルの作成先
+  (defun make-auto-save-file-name ()
+    (concat
+     "~/.trash/"
+     "#"
+     (format-time-string "%04Y%02m%02d-%02H%02M%02S-" (current-time))
+     (file-name-nondirectory buffer-file-name)
+     "#"))
 
   ;; 表示関連設定
   ;; 現在行に色をつける
@@ -310,6 +350,7 @@
   (cond
    ((= env ENV-COLINUX) (init-linux))
    ((= env ENV-DEBIAN) (init-linux))
+   ((= env ENV-NETBSD) (init-linux))
    ((= env ENV-WIN-V22) (init-windows-dev))
    ((= env ENV-WIN-V23) (init-windows))
    (t (princ (format "Init Error: os is not supported .\n")))

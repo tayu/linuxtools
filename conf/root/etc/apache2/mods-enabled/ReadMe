@@ -1,0 +1,18 @@
+to enable public_html
+
+以下を実行する
+# a2enmod userdir
+
+以下と同様（多分）
+# cd /etc/apache2/mods-enabled/
+# ln -sf ../mods-available/userdir.conf userdir.conf
+# ln -sf ../mods-available/userdir.load userdir.load
+
+また、CGI の実行にもモジュールのインストールが必要
+# a2enmod cgi
+
+# /etc/apache2/mods-enabled
+# ls -lF cgi*
+lrwxrwxrwx 1 root root 27  9月 15 01:27 cgid.conf -> ../mods-available/cgid.conf
+lrwxrwxrwx 1 root root 27  9月 15 01:27 cgid.load -> ../mods-available/cgid.load
+

@@ -1,0 +1,40 @@
+#! /bin/bash
+
+
+
+/bin/mv $@
+exit $?
+
+
+
+# 保留
+# ディレクトリ同士とか、ファイル対ディレクトリとか
+
+
+TRASH="$HOME/.trash"
+DATE=`date "+%Y%m%d-%H%M%S"`
+
+OPT=""
+while [ "-" = "${1:0:1}" ]; do
+    OPT="${OPT} $1"
+    shift
+done
+
+if [ ! 2 -eq $# ]; then
+    echo "ERROR: Number of Argument ."
+    exit 1
+fi
+SRC=$1
+DST=$2
+
+# 上書きになる場合、事前にバックアップを退避
+if [ ! "." = "${DST}" -a ! ".." = "${DST}" ]; then
+    if [ -e ${DST} ]; then
+	if [ ! -d ${TRASH} ]; then
+	    mkdir -p ${TRASH}
+	fi
+	/bin/mv -f ${DST} ${TRASH}/${DATE}-`basename ${DST}`
+    fi
+fi
+
+/bin/mv ${OPT} ${SRC} ${DST}

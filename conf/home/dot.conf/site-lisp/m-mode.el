@@ -164,6 +164,16 @@
     ;; (define-key m-mode-map "\C-k" map)
     ;;
 
+    ;; Tab 入力
+    ;; TeraTerm からは S-Tab が入力できないので、2 ストローク
+    ;; Win からは C-Tab は入力できない（ウインドウ切り替えになる）
+    (define-key map [(tab)] (kbd "C-k i"))
+    (define-key map [(control tab)] (kbd "C-k i"))
+    (define-key map [(control i)] (kbd "C-k i"))
+    (define-key map [(i)] (lambda ()
+	(interactive)
+	(insert "\t" )))
+
     ;; ウインドウ／バッファ切り替え：巡回 or 自他
     (define-key map [(control n)] (kbd "C-k n"))
     (define-key map [(n)] (lambda ()
@@ -233,13 +243,6 @@
 			 ;; emacs-version
 			 ))
 	))
-
-    ;; Tab 入力
-    ;; TeraTerm からは効かない
-    (define-key map [(control shift i)]
-      (lambda ()
-	(interactive)
-	(insert "\t" )))
 
 
     ;; キーボードマクロ:実行
