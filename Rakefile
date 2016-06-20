@@ -8,6 +8,15 @@ task :all => [ :conf, :misc ] do
   puts 'done: gen all'
 end
 
+task :list do
+  puts ' all: => conf, misc'
+  puts '==============================='
+  puts 'conf: update conf/'
+  puts 'misc: update misc/'
+  puts '  up: commit & update to Github'
+end
+
+
 task :conf do
   chdir "conf"
   sh "cp -apr ~/conf/home ."
@@ -22,18 +31,11 @@ task :misc do
   chdir "../.."
 end
 
-
-
 # up pages repository
-task :commit do
+task :up do
   dt = sprintf( "%04d-%02d-%02d", Time.now.year, Time.now.month, Time.now.day )
   sh "git add --all"
   sh "git commit -m '#{dt}'"
-end
-
-task :co => [ "commit" ] do
-end
-task :up => [ "commit" ] do
   sh "git push origin master"
 end
 
