@@ -7,10 +7,21 @@ SHARE="/media/sf_share"
 RMOPT=""
 
 
+# anacron だと一般ユーザ分を実行しないので、ここから実行する
+CRONDIR="$HOME/conf/cron/cron.daily"
+CRONSCRIPT="trashbox.sh"
+if [ -d $CRONDIR ]; then
+    if [ -x $CRONDIR/$CRONSCRIPT ]; then
+	(cd $HOME/conf/cron/cron.daily; ./trashbox.sh)
+    fi
+fi
+
+# check directory
 if [ ! -d ${TRASH} ]; then
     mkdir -p ${TRASH}
 fi
 
+# main
 while [ 0 -lt $# ]; do
     fname="$1"
     shift
@@ -27,7 +38,7 @@ while [ 0 -lt $# ]; do
     fi
 
     # パスを分離しファイル名をフルパスにする
-    # シンボリックリンクを戻した名称も取得
+    # シンボリックリンクのリンク元の名称も取得
     if [ "/" = "${fname:0:1}" ]; then
 	pname="`dirname "$fname"`"
     elif [ "${f}" != "${fname/\//}" ]; then
@@ -58,4 +69,3 @@ while [ 0 -lt $# ]; do
 	/bin/mv -f "$fname" "${TRASH}/${DATE}-${bname}"
     fi
 done
-
