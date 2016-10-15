@@ -1,4 +1,17 @@
 
+# 2016/10/15 radiko の 2016/10/11 の仕様変更に対応
+# 既存の認証ファイルで聴けているので、swf の url が変わった程度だと思ってたら
+# 参照 https://gist.github.com/booska/8861693
+#	player.swf の url 変更
+#	player.swf の swfextract への -b パラメータ変更
+#		14 --> 12
+#	auth1_fms 、auth2_fms を取得するときの バージョン変更
+#		3.0.0.01 -> 4.0.0
+#	auth1_fms 、auth2_fms を取得するときの X-Radiko-App
+#		参考にしたページと違ったので、念のために変更
+#		pc_1 --> pc_ts
+
+
 # CTRL+C is pressed, or other signals
 trap "_atexit;  exit 1" HUP INT QUIT USR1 USR2
 
@@ -18,17 +31,12 @@ authtoken=""
 stname=""
 retry_limit="6"
 
-# version
-VERSION=3.0.0.01
-
 # 認証関係ファイル/urlの保存先
 tempdir="/tmp"
 keydir="$tempdir/.radiko"
-keyfile="${keydir}/authkey.jpg"
 playerfile="${keydir}/player.swf"
 auth1_fms="${tempdir}/auth1_fms_$$"
 auth2_fms="${tempdir}/auth2_fms_$$"
-playerurl="http://radiko.jp/player/swf/player_${VERSION}.swf"
 # 余白
 filler="60"
 # ページ表示
@@ -48,6 +56,12 @@ mpopt="--bandwidth=128000 --cache=256"
 
 # rtmpdump
 RTMPDUMP="rtmpdump --quiet --timeout 360"
+
+# radiko side settings
+VERSION="4.0.0"
+keyfile="${keydir}/authkey.png"
+playerurl="http://radiko.jp/apps/js/flash/myplayer-release.swf"
+bits=12
 
 
 # 使い方
@@ -454,7 +468,7 @@ function radiko_authorize() {
     #
     if [ ! -f $keyfile ]; then
         echo $keyfile extracting...
-        swfextract -b 14 $playerfile -o $keyfile
+	swfextract -b $bits $playerfile -o $keyfile
         if [ ! -f $keyfile ]; then
             echo "failed get keydata"
             exit 1
@@ -466,7 +480,7 @@ function radiko_authorize() {
     #
     wget -q \
         --header="pragma: no-cache" \
-        --header="X-Radiko-App: pc_1" \
+        --header="X-Radiko-App: pc_ts" \
         --header="X-Radiko-App-Version: $VERSION" \
         --header="X-Radiko-User: test-stream" \
         --header="X-Radiko-Device: pc" \
@@ -497,7 +511,7 @@ function radiko_authorize() {
     #
     wget -q \
         --header="pragma: no-cache" \
-        --header="X-Radiko-App: pc_1" \
+        --header="X-Radiko-App: pc_ts" \
         --header="X-Radiko-App-Version: $VERSION" \
         --header="X-Radiko-User: test-stream" \
         --header="X-Radiko-Device: pc" \

@@ -1,7 +1,13 @@
 # radikoとradiruの録音スクリプト（勝手に改造版）
 
-orignal は
-https://github.com/zarigani/radikoru
+
+## 変更履歴
+
+2016/10/11 の使用変更対応は
+[Radikoを録音するWSH](https://gist.github.com/booska/8861693)
+
+オリジナルは
+[zarigani/radikoru](https://github.com/zarigani/radikoru)
 
 
 ## rd_rec.sh
