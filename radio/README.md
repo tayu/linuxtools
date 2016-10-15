@@ -3,8 +3,9 @@
 
 ## 変更履歴
 
-2016/10/11 の使用変更対応は
+2016/10/11 の仕様変更対応は
 [Radikoを録音するWSH](https://gist.github.com/booska/8861693)
+から
 
 オリジナルは
 [zarigani/radikoru](https://github.com/zarigani/radikoru)
