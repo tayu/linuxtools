@@ -83,10 +83,10 @@ function sumul_record() {
 	opt="$opt ${url}"
     elif [ ".asx" = "${url:${#url}-4:4}" ]; then
 	mms=($( \
-	    wget -q "${url}" -O - \
-	      | grep 'mms://' \
-	      | perl -pe 's!^(.*)"(.*)"(.*)$!$2!' \
-	      ))
+		    wget -q "${url}" -O - \
+			| grep 'mms://' \
+			| perl -pe 's!^(.*)"(.*)"(.*)$!$2!' \
+		))
 	if [ ! -z "${mms}" ]; then
 	    opt="$opt ${mms}"
 	else

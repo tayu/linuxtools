@@ -38,26 +38,26 @@ function radiko_record() {
 
 
 # 録音: NHK
-# WARNING が 2 個出る
-# mplayer のみでも可能らしい: https://gist.github.com/matchy2/5310409
+# こじまさん http://plamo.linet.gr.jp/wiki/index.php?diary%2FKojima
+# チャンネルhttp://www.nhk.or.jp/radio/config/config_web.xml
 function radiko_nhk() {
-    local PLAYPATH ID rc
+    local url savefile rc
 
-    PLAYPATH="$1"
+    url="$1"
     ID="${channel##*-}"
     ID="${ID,,}" # 小文字にしておく
+    savefile="${output%%.flv}.m4a"
 
-    echo "==== recording ===="
-    echo "save as '$output'"
+    echo "==== recording (nhk-${ID}) ===="
+    echo "save as '${savefile}'"
 
-    ${RTMPDUMP} \
-	--rtmp "rtmpe://netradio-${ID}-flash.nhk.jp" \
-        --playpath "${PLAYPATH}" \
-        --app "live" \
-        -W http://www3.nhk.or.jp/netradio/files/swf/rtmpe.swf \
-        --live \
-        --stop "${rectime}" \
-        -o "${output}"
+    ffmpeg \
+	-i "${url}" \
+	-t ${rectime} \
+	-movflags faststart \
+	-c copy \
+	-bsf:a aac_adtstoasc \
+	"${savefile}"
     rc=$?
 
     if [ ! -z "${oname}" ]; then

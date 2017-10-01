@@ -674,13 +674,13 @@ set_simul_station
 while [ $st -lt $ed ]; do
     case ${channel} in
         NHK-R1)  # ラジオ第1
-            radiko_nhk "NetRadio_R1_flash@63346"
+            radiko_nhk "https://nhkradioakr1-i.akamaihd.net/hls/live/511633/1-r1/1-r1-01.m3u8"
             ;;
         NHK-R2)  # ラジオ第2
-            radiko_nhk "NetRadio_R2_flash@63342"
+            radiko_nhk "https://nhkradioakr2-i.akamaihd.net/hls/live/511929/1-r2/1-r2-01.m3u8"
             ;;
         NHK-FM)  # NHK-FM
-            radiko_nhk "NetRadio_FM_flash@63343"
+            radiko_nhk "https://nhkradioakfm-i.akamaihd.net/hls/live/512290/1-fm/1-fm-01.m3u8"
             ;;
         * )
 	    url=${SIMUL_ST[ ${channel} ]}
