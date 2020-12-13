@@ -3,12 +3,21 @@
 
 ## 変更履歴
 
+2020/12/03 の仕様変更対応は
+https://blog.bluedeer.net/archives/224
+https://gist.github.com/matchy2/3956266
+から
+
 2016/10/11 の仕様変更対応は
 [Radikoを録音するWSH](https://gist.github.com/booska/8861693)
 から
 
 オリジナルは
 [zarigani/radikoru](https://github.com/zarigani/radikoru)
+
+
+NHK はいつかの仕様変更から使えていない。
+が、Radiko で聞けるようになったので当面はそっちで聞く
 
 
 ## rd_rec.sh
@@ -58,4 +67,9 @@ NHK に続いてサイマルラジオも追加。
 後で直すかも。
 
 必ず、上の 2 スクリプトと同じディレトクリに置く。
+
+
+## rd_timefree.sh
+タイムフリー用
+とりあえず、東京リージョン専用
 
